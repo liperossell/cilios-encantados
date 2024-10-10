@@ -1,0 +1,88 @@
+<mat-card>
+  <mat-stepper [orientation]="(stepperOrientation | async)!"
+               linear>
+    <mat-step [stepControl]="firstFormGroup" label="Dados pessoais">
+      <form [formGroup]="firstFormGroup">
+        <mat-card appearance="raised" class="full-width">
+          <mat-card-header>
+            <mat-card-title>Informe seus dados pessoais</mat-card-title>
+          </mat-card-header>
+          <br>
+          <mat-card-content>
+            <mat-form-field class="mat-content">
+              <mat-label>Nome</mat-label>
+              <input formControlName="name" matInput placeholder="Seu nome completo" required>
+            </mat-form-field>
+            <br>
+            <mat-form-field class="mat-content">
+              <mat-label>E-mail</mat-label>
+              <input formControlName="email" matInput placeholder="Seu melhor e-mail" required type="email">
+            </mat-form-field>
+            <br>
+            <mat-form-field class="mat-content">
+              <mat-label>Celular</mat-label>
+              <input formControlName="phone" matInput placeholder="Seu número de celular" required type="tel">
+            </mat-form-field>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button [disabled]="firstFormGroup.invalid" extended mat-fab matStepperNext>
+              <mat-icon>arrow_forward</mat-icon>
+              Próximo
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </form>
+    </mat-step>
+    <mat-step [stepControl]="secondFormGroup" label="Data e hora">
+      <form [formGroup]="secondFormGroup">
+        <mat-card appearance="raised" class="full-width">
+          <mat-card-header>
+            <mat-card-title>Escolha uma data</mat-card-title>
+          </mat-card-header>
+          <br>
+          <mat-card-content>
+            <mat-form-field class="mat-content">
+              <mat-label>Escolha uma data</mat-label>
+              <input (dateChange)="getAvailability($event)" [matDatepickerFilter]="myFilter" [matDatepicker]="picker"
+                     formControlName="date"
+                     matInput>
+              <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          </mat-card-content>
+          <mat-card-content>
+            <mat-label *ngIf="availabilityResponse && availabilityResponse.length > 0">Escolha um horário</mat-label>
+            <mat-label *ngIf="availabilityResponse && availabilityResponse.length == 0">Não há horário disponível na data informada</mat-label>
+            <mat-chip-listbox (change)="onSelectionChange($event)" required>
+              <mat-chip-option *ngFor="let response of availabilityResponse" [value]="response.start">
+                {{ response.start.dateTime.value | date: 'HH:mm' }}
+              </mat-chip-option>
+            </mat-chip-listbox>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button extended mat-fab matStepperNext [disabled]="secondFormGroup.invalid">
+              <mat-icon>arrow_forward</mat-icon>
+              Próximo
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </form>
+    </mat-step>
+    <mat-step [stepControl]="thirdFormGroup" label="Fill out your phone number">
+      <form [formGroup]="thirdFormGroup">
+        <mat-form-field>
+          <mat-label>Phone number</mat-label>
+          <input formControlName="thirdCtrl" matInput placeholder="Ex. 12345678" required>
+        </mat-form-field>
+      </form>
+    </mat-step>
+    <mat-step>
+      <ng-template matStepLabel>Done</ng-template>
+      <p>You are now done.</p>
+      <div>
+        <button mat-button matStepperPrevious>Back</button>
+      </div>
+    </mat-step>
+  </mat-stepper>
+
+</mat-card>
