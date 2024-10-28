@@ -108,6 +108,20 @@ export class StepperComponent {
   }
 
   onSelectionChange($event: MatChipListboxChange) {
-    this.secondFormGroup.get('time')?.setValue(new Date($event.value.dateTime.value).toISOString());
+    this.secondFormGroup.get('time')?.setValue(new Date($event.value).toISOString());
+  }
+
+  onSave() {
+    const event = {
+      name: this.firstFormGroup.get('name')?.value,
+      phone: this.firstFormGroup.get('phone')?.value,
+      email: this.firstFormGroup.get('email')?.value,
+      time: this.secondFormGroup.get('time')?.value,
+    };
+    this.isLoading.emit(true);
+    this._appStepperService.createEvent(event).subscribe((response) => {
+      console.log('Event created:', response);
+      this.isLoading.emit(false);
+    });
   }
 }
