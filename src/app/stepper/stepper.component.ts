@@ -27,6 +27,7 @@ import {
 import {StepperService} from './stepper.service';
 import {CalendarEvent} from '../model/CalendarEvent';
 import {MatChipListbox, MatChipListboxChange, MatChipOption} from '@angular/material/chips';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-stepper',
@@ -64,6 +65,7 @@ import {MatChipListbox, MatChipListboxChange, MatChipOption} from '@angular/mate
 export class StepperComponent {
   @Output() readonly isLoading = new EventEmitter<boolean>();
   private readonly _formBuilder = inject(FormBuilder);
+
   firstFormGroup = this._formBuilder.group({
     name: ['', Validators.required],
     email: ['', Validators.required],
@@ -72,9 +74,6 @@ export class StepperComponent {
   secondFormGroup = this._formBuilder.group({
     date: ['', Validators.required],
     time: ['', Validators.required],
-  });
-  thirdFormGroup = this._formBuilder.group({
-    thirdCtrl: ['', Validators.required],
   });
 
   stepperOrientation: Observable<StepperOrientation>;
@@ -88,7 +87,8 @@ export class StepperComponent {
 
   availabilityResponse: CalendarEvent[] | undefined;
 
-  constructor(private readonly _appStepperService: StepperService) {
+  constructor(private readonly _appStepperService: StepperService,
+              private readonly _snackBar: MatSnackBar) {
     const breakpointObserver = inject(BreakpointObserver);
 
     this.stepperOrientation = breakpointObserver
@@ -97,14 +97,24 @@ export class StepperComponent {
   }
 
   getAvailability(event: MatDatepickerInputEvent<any, any>) {
+
     const date = event.value as Date;
+
     this.isLoading.emit(true);
 
-    this._appStepperService.getAvailability(date.toISOString()).subscribe((availabilityResponse) => {
-      this.availabilityResponse = availabilityResponse;
-
-      this.isLoading.emit(false);
+    this._appStepperService.getAvailability(date.toISOString()).subscribe({
+      next: (availabilityResponse) => {
+        this.availabilityResponse = availabilityResponse;
+      },
+      error: (err) => {this.showError(err);},
+      complete: () => {
+        this.isLoading.emit(false);
+      }
     })
+  }
+
+  private showError(err: any) {
+    this.openSnackBar(`Ocorreu um erro (${err.status})`, "OK")
   }
 
   onSelectionChange($event: MatChipListboxChange) {
@@ -112,16 +122,31 @@ export class StepperComponent {
   }
 
   onSave() {
+
     const event = {
       name: this.firstFormGroup.get('name')?.value,
       phone: this.firstFormGroup.get('phone')?.value,
       email: this.firstFormGroup.get('email')?.value,
       time: this.secondFormGroup.get('time')?.value,
     };
+
     this.isLoading.emit(true);
-    this._appStepperService.createEvent(event).subscribe((response) => {
-      console.log('Event created:', response);
-      this.isLoading.emit(false);
+
+    this._appStepperService.createEvent(event).subscribe({
+      next: (response) => {
+        console.log('Event created:', response);
+        this.isLoading.emit(false);
+      },
+      error: (err) => {this.openSnackBar(`Ocorreu um erro ${err.status}`, "OK")},
+      complete: () => {
+        this.isLoading.emit(false);
+      }
+    });
+  }
+
+  openSnackBar(message: string, action?: string) {
+    this._snackBar.open(message, action, {
+      duration: 1450
     });
   }
 }
