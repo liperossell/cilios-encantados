@@ -71,11 +71,13 @@
               <mat-card-content>
                 <mat-card-subtitle *ngIf="availabilityResponse && availabilityResponse.length > 0">Escolha um horário
                 </mat-card-subtitle>
-                <mat-card-subtitle *ngIf="availabilityResponse && availabilityResponse.length == 0">Não há horário disponível na
+                <mat-card-subtitle *ngIf="availabilityResponse && availabilityResponse.length == 0">Não há horário
+                  disponível na
                   data informada
                 </mat-card-subtitle>
                 <mat-chip-listbox (change)="onSelectionChange($event)" required>
-                  <mat-chip-option *ngFor="let response of availabilityResponse" [value]="response.start.dateTime.value">
+                  <mat-chip-option *ngFor="let response of availabilityResponse"
+                                   [value]="response.start.dateTime.value">
                     {{ response.start.dateTime.value | date: 'HH:mm' }}
                   </mat-chip-option>
                 </mat-chip-listbox>
@@ -84,7 +86,7 @@
             <mat-card-content>
               <mat-card-footer>
                 <mat-card-actions align="start">
-                  <button (click)="onSave()" [disabled]="secondFormGroup.invalid" extended mat-fab matStepperNext>
+                  <button extended mat-fab matStepperNext>
                     <mat-icon>arrow_forward</mat-icon>
                     Próximo
                   </button>
@@ -99,26 +101,26 @@
           <mat-card-content>
             <mat-card-header>
               <mat-card-content>
-                <mat-card-title>Seu horário está agendado!</mat-card-title>
+                <mat-card-title>Pronta para se sentir mais linda?!</mat-card-title>
               </mat-card-content>
             </mat-card-header>
           </mat-card-content>
           <mat-card-content>
             <mat-card-header>
               <mat-card-content>
-                <mat-card-subtitle>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec in faucibus lectus.
-                  Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Quisque varius
-                  massa pulvinar porta luctus. Nunc sodales, dui tempor semper laoreet, est est ornare lacus, eu
-                  ultricies purus lacus vel lectus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices
-                  posuere cubilia curae; Donec condimentum nibh vel libero placerat ultrices. Ut vel bibendum risus, ac
-                  vulputate orci. Morbi viverra ligula ut sem vestibulum, at vulputate dui porttitor. Sed posuere, dolor
-                  vitae pharetra efficitur, odio eros viverra lorem, non volutpat dui libero in velit. Suspendisse
-                  potenti. Nulla in felis porttitor nisi malesuada interdum. Sed fermentum pharetra sem id rutrum. Duis
-                  scelerisque diam ac metus pharetra, in volutpat odio pharetra. Aenean condimentum lorem in metus
-                  viverra ullamcorper.
+                <mat-card-subtitle>Será enviado uma mensagem para o seu número para confirmação do atendimento.
+                </mat-card-subtitle>
+                <mat-card-subtitle>Se precisar, pode entrar em contato pelo telefone:
+                  <a href="tel:+5548988076922">(48) 9-8807-6922</a>
                 </mat-card-subtitle>
               </mat-card-content>
             </mat-card-header>
+            <mat-card-footer>
+              <mat-card-content>
+                <img (click)="openWhatsAppLink()" alt="Chat on WhatsApp"
+                     src="assets/WhatsAppButtonWhiteSmall.svg">
+              </mat-card-content>
+            </mat-card-footer>
           </mat-card-content>
         </mat-card>
       </mat-step>

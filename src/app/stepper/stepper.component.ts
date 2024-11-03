@@ -1,7 +1,7 @@
 import {Component, EventEmitter, inject, Output} from '@angular/core';
-import {FormBuilder, Validators, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {BreakpointObserver} from '@angular/cdk/layout';
-import {StepperOrientation, MatStepperModule} from '@angular/material/stepper';
+import {MatStepperModule, StepperOrientation} from '@angular/material/stepper';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {MatButtonModule} from '@angular/material/button';
@@ -10,12 +10,14 @@ import {MatFormFieldModule} from '@angular/material/form-field';
 import {AsyncPipe, DatePipe, NgForOf, NgIf} from '@angular/common';
 import {MatIcon} from '@angular/material/icon';
 import {
-  MatCard, MatCardActions,
+  MatCard,
+  MatCardActions,
   MatCardContent,
   MatCardFooter,
   MatCardHeader,
   MatCardSubtitle,
-  MatCardTitle, MatCardTitleGroup
+  MatCardTitle,
+  MatCardTitleGroup
 } from '@angular/material/card';
 import {
   MatCalendar,
@@ -34,49 +36,27 @@ import {MatSnackBar} from '@angular/material/snack-bar';
   templateUrl: './stepper.component.html',
   styleUrl: './stepper.component.css',
   standalone: true,
-  imports: [
-    MatStepperModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    AsyncPipe,
-    MatIcon,
-    MatCard,
-    MatCalendar,
-    NgIf,
-    MatDatepickerToggle,
-    MatDatepicker,
-    MatDatepickerInput,
-    NgForOf,
-    MatCardContent,
-    MatCardTitle,
-    MatCardSubtitle,
-    MatCardHeader,
-    MatCardFooter,
-    MatChipListbox,
-    MatChipOption,
-    MatCardTitleGroup,
-    MatCardActions,
-    DatePipe,
-  ],
+  imports: [MatStepperModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, AsyncPipe, MatIcon, MatCard, MatCalendar, NgIf, MatDatepickerToggle, MatDatepicker, MatDatepickerInput, NgForOf, MatCardContent, MatCardTitle, MatCardSubtitle, MatCardHeader, MatCardFooter, MatChipListbox, MatChipOption, MatCardTitleGroup, MatCardActions, DatePipe,],
 })
 export class StepperComponent {
   @Output() readonly isLoading = new EventEmitter<boolean>();
+  stepperOrientation: Observable<StepperOrientation>;
+  availabilityResponse: CalendarEvent[] | undefined;
   private readonly _formBuilder = inject(FormBuilder);
-
   firstFormGroup = this._formBuilder.group({
-    name: ['', Validators.required],
-    email: ['', Validators.required],
-    phone: ['', Validators.required],
+    name: ['', Validators.required], email: ['', Validators.required], phone: ['', Validators.required],
   });
   secondFormGroup = this._formBuilder.group({
-    date: ['', Validators.required],
-    time: ['', Validators.required],
+    date: ['', Validators.required], time: ['', Validators.required],
   });
 
-  stepperOrientation: Observable<StepperOrientation>;
+  constructor(private readonly _appStepperService: StepperService, private readonly _snackBar: MatSnackBar) {
+    const breakpointObserver = inject(BreakpointObserver);
+
+    this.stepperOrientation = breakpointObserver
+      .observe('(min-width: 800px)')
+      .pipe(map(({matches}) => (matches ? 'horizontal' : 'vertical')));
+  }
 
   myFilter = (d: Date | null): boolean => {
     const day = (d || new Date()).getDay();
@@ -84,17 +64,6 @@ export class StepperComponent {
     // TODO Check for closed date?
     return day !== 0 && day !== 6;
   };
-
-  availabilityResponse: CalendarEvent[] | undefined;
-
-  constructor(private readonly _appStepperService: StepperService,
-              private readonly _snackBar: MatSnackBar) {
-    const breakpointObserver = inject(BreakpointObserver);
-
-    this.stepperOrientation = breakpointObserver
-      .observe('(min-width: 800px)')
-      .pipe(map(({matches}) => (matches ? 'horizontal' : 'vertical')));
-  }
 
   getAvailability(event: MatDatepickerInputEvent<any, any>) {
 
@@ -105,16 +74,12 @@ export class StepperComponent {
     this._appStepperService.getAvailability(date.toISOString()).subscribe({
       next: (availabilityResponse) => {
         this.availabilityResponse = availabilityResponse;
-      },
-      error: (err) => {this.showError(err);},
-      complete: () => {
+      }, error: (err) => {
+        this.showError(err);
+      }, complete: () => {
         this.isLoading.emit(false);
       }
     })
-  }
-
-  private showError(err: any) {
-    this.openSnackBar(`Ocorreu um erro (${err.status})`, "OK")
   }
 
   onSelectionChange($event: MatChipListboxChange) {
@@ -134,11 +99,12 @@ export class StepperComponent {
 
     this._appStepperService.createEvent(event).subscribe({
       next: (response) => {
-        console.log('Event created:', response);
+        const ics = this.eventToICS(response);
+        this.downloadICSFile(ics);
         this.isLoading.emit(false);
-      },
-      error: (err) => {this.openSnackBar(`Ocorreu um erro ${err.status}`, "OK")},
-      complete: () => {
+      }, error: (err) => {
+        this.openSnackBar(`Ocorreu um erro ${err.status}`, "OK")
+      }, complete: () => {
         this.isLoading.emit(false);
       }
     });
@@ -148,5 +114,37 @@ export class StepperComponent {
     this._snackBar.open(message, action, {
       duration: 1450
     });
+  }
+
+  downloadICSFile(icsContent: string) {
+    const blob = new Blob([icsContent], {type: 'text/calendar'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'event.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  protected openWhatsAppLink() {
+    window.open(`https://wa.me/5548988076922?text=Oi, meu nome é ${this.firstFormGroup.get('name')}' e fiz um agendamento. Gostaria de mais informações.`, '_blank');
+  }
+
+  protected eventToICS(event: any): string {
+    const pad = (num: number): string => (num < 10 ? '0' + num : num.toString());
+
+    const formatDate = (date: Date): string => {
+      return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
+    };
+
+    const startDate = new Date(event.start.dateTime || event.start.date);
+    const endDate = new Date(event.end.dateTime || event.end.date);
+
+    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Your Organization//Your Product//EN', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT', `UID:${event.id}`, `DTSTAMP:${formatDate(new Date())}`, `DTSTART:${formatDate(startDate)}`, `DTEND:${formatDate(endDate)}`, `SUMMARY:${event.summary}`, `DESCRIPTION:${event.description}`, `LOCATION:${event.location}`, `STATUS:${event.status}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+  }
+
+  private showError(err: any) {
+    this.openSnackBar(`Ocorreu um erro (${err.status})`, "OK")
   }
 }
