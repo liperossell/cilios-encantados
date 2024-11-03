@@ -27,7 +27,7 @@ export class CalendarEvent {
   summary: string;
   transparency?: string;
   updated: Updated;
-
+  location?: string;
   constructor(
     colorId: string | undefined,
     created: DateTime,
@@ -48,7 +48,8 @@ export class CalendarEvent {
     status: string,
     summary: string,
     transparency: string | undefined,
-    updated: Updated
+    updated: Updated,
+    location: string | undefined,
   ) {
     this.colorId = colorId;
     this.created = created;
@@ -70,5 +71,6 @@ export class CalendarEvent {
     this.summary = summary;
     this.transparency = transparency;
     this.updated = updated;
+    this.location = location;
   }
 }

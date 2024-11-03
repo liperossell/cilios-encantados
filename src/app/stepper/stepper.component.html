@@ -86,7 +86,7 @@
             <mat-card-content>
               <mat-card-footer>
                 <mat-card-actions align="start">
-                  <button extended mat-fab matStepperNext>
+                  <button (click)="onSave()" [disabled]="secondFormGroup.invalid" extended mat-fab matStepperNext>
                     <mat-icon>arrow_forward</mat-icon>
                     Próximo
                   </button>
@@ -111,7 +111,7 @@
                 <mat-card-subtitle>Será enviado uma mensagem para o seu número para confirmação do atendimento.
                 </mat-card-subtitle>
                 <mat-card-subtitle>Se precisar, pode entrar em contato pelo telefone:
-                  <a href="tel:+5548988076922">(48) 9-8807-6922</a>
+                  <a href="tel:+5548988410133">(48) 9-8841-0133</a>
                 </mat-card-subtitle>
               </mat-card-content>
             </mat-card-header>

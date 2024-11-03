@@ -20,11 +20,7 @@ import {
   MatCardTitleGroup
 } from '@angular/material/card';
 import {
-  MatCalendar,
-  MatDatepicker,
-  MatDatepickerInput,
-  MatDatepickerInputEvent,
-  MatDatepickerToggle
+  MatCalendar, MatDatepicker, MatDatepickerInput, MatDatepickerInputEvent, MatDatepickerToggle
 } from '@angular/material/datepicker';
 import {StepperService} from './stepper.service';
 import {CalendarEvent} from '../model/CalendarEvent';
@@ -44,10 +40,10 @@ export class StepperComponent {
   availabilityResponse: CalendarEvent[] | undefined;
   private readonly _formBuilder = inject(FormBuilder);
   firstFormGroup = this._formBuilder.group({
-    name: ['', Validators.required], email: ['', Validators.required], phone: ['', Validators.required],
+    name: [undefined, Validators.required], email: [undefined, Validators.required], phone: [undefined, Validators.required],
   });
   secondFormGroup = this._formBuilder.group({
-    date: ['', Validators.required], time: ['', Validators.required],
+    date: [undefined, Validators.required], time: ['', Validators.required],
   });
 
   constructor(private readonly _appStepperService: StepperService, private readonly _snackBar: MatSnackBar) {
@@ -121,14 +117,16 @@ export class StepperComponent {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'event.ics';
+    a.download = 'ciliosEncantados.ics';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
   }
 
   protected openWhatsAppLink() {
-    window.open(`https://wa.me/5548988076922?text=Oi, meu nome é ${this.firstFormGroup.get('name')}' e fiz um agendamento. Gostaria de mais informações.`, '_blank');
+    const name = this.firstFormGroup.get('name')?.value;
+    if (name) window.open(`https://wa.me/5548988410133?text=Oi, meu nome é ${name} e fiz um agendamento. Gostaria de mais informações.`, '_blank'); else window.open('https://wa.me/5548988076922?', '_blank');
+
   }
 
   protected eventToICS(event: any): string {
@@ -138,10 +136,10 @@ export class StepperComponent {
       return `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
     };
 
-    const startDate = new Date(event.start.dateTime || event.start.date);
-    const endDate = new Date(event.end.dateTime || event.end.date);
-
-    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Your Organization//Your Product//EN', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT', `UID:${event.id}`, `DTSTAMP:${formatDate(new Date())}`, `DTSTART:${formatDate(startDate)}`, `DTEND:${formatDate(endDate)}`, `SUMMARY:${event.summary}`, `DESCRIPTION:${event.description}`, `LOCATION:${event.location}`, `STATUS:${event.status}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    const startDate = new Date(event.start.dateTime?.value || event.start?.date?.value);
+    const endDate = new Date(event.end.dateTime?.value || event.end?.date?.value);
+    const description = 'Seu agendamento em Cílios Encantados'
+    return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Your Organization//Your Product//EN', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT', `UID:${event.id}`, `DTSTAMP:${formatDate(new Date())}`, `DTSTART:${formatDate(startDate)}`, `DTEND:${formatDate(endDate)}`, `SUMMARY:${event.summary}`, `DESCRIPTION:${description}`, `LOCATION:${event.location}`, `STATUS:${event.status}`, 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
   }
 
   private showError(err: any) {

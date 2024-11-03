@@ -32,7 +32,8 @@ export class StepperService {
         response.status,
         response.summary,
         response.transparency,
-        response.updated
+        response.updated,
+        response.location
       )))
     );
   }
@@ -59,7 +60,8 @@ export class StepperService {
         response.status,
         response.summary,
         response.transparency,
-        response.updated
+        response.updated,
+        response.location
       ))
     );
   }
